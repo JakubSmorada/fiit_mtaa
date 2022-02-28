@@ -1,6 +1,7 @@
 import logging
 import socketserver
 import socket
+import sys
 import time
 import sipfullproxy
 
@@ -12,10 +13,9 @@ if __name__ == "__main__":
     logging.info(time.strftime("%a, %d %b %Y %H:%M:%S ", time.localtime()))
     hostname = socket.gethostname()
     logging.info(hostname)
-    #ipaddress = socket.gethostbyname(hostname)
-    ipaddress = "192.168.0.228"
-    #if ipaddress == "127.0.0.1":
-    #    ipaddress = sys.argv[1]
+    ipaddress = socket.gethostbyname(hostname)
+    if ipaddress == "127.0.0.1":
+        ipaddress = sys.argv[1]
     logging.info(ipaddress)
     sipfullproxy.recordroute = "Record-Route: <sip:%s:%d;lr>" % (ipaddress, PORT)
     sipfullproxy.topvia = "Via: SIP/2.0/UDP %s:%d" % (ipaddress, PORT)
