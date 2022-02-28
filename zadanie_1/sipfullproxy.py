@@ -19,7 +19,7 @@ import socket
 import time
 import logging
 
-HOST, PORT = '10.10.10.172', 6000
+HOST, PORT = '192.168.0.109', 6000
 rx_register = re.compile("^REGISTER")
 rx_invite = re.compile("^INVITE")
 rx_ack = re.compile("^ACK")
@@ -344,12 +344,23 @@ class UDPHandler(socketserver.BaseRequestHandler):
 
     def processCode(self):
         origin = self.getOrigin()
+
         if len(origin) > 0:
             logging.debug("origin %s" % origin)
             if origin in registrar:
                 socket, claddr = self.getSocketInfo(origin)
                 self.data = self.removeRouteHeader()
                 data = self.removeTopVia()
+
+                if data[0] == 'SIP/2.0 100 Trying':
+                    data[0] = 'SIP/2.0 100 Skusam'
+
+                if data[0] == 'SIP/2.0 180 Ringing':
+                    data[0] = 'SIP/2.0 180 Zvonim'
+
+                if data[0] == 'SIP/2.0 486 Busy here':
+                    data[0] = 'SIP/2.0 486 Obsadene'
+
                 text = "\r\n".join(data).encode("utf-8")
                 socket.sendto(text, claddr)
                 showtime()
@@ -412,7 +423,7 @@ class UDPHandler(socketserver.BaseRequestHandler):
                 logging.warning("---\n>> server received [%d]:" % len(data))
                 hexdump(data, ' ', 16)
                 logging.warning("---")
-
+"""
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', filename='proxy.log', level=logging.INFO,
                         datefmt='%H:%M:%S')
@@ -420,7 +431,7 @@ if __name__ == "__main__":
     hostname = socket.gethostname()
     logging.info(hostname)
     #ipaddress = socket.gethostbyname(hostname)
-    ipaddress = "10.10.10.172"
+    ipaddress = "192.168.0.109"
     print(ipaddress)
     #if ipaddress == "127.0.0.1":
     #    ipaddress = sys.argv[1]
@@ -428,4 +439,4 @@ if __name__ == "__main__":
     recordroute = "Record-Route: <sip:%s:%d;lr>" % (ipaddress, PORT)
     topvia = "Via: SIP/2.0/UDP %s:%d" % (ipaddress, PORT)
     server = socketserver.UDPServer((HOST, PORT), UDPHandler)
-    server.serve_forever()
+    server.serve_forever()"""""
